@@ -1,0 +1,151 @@
+<html>
+<head>
+    <style>
+        html{
+            font-family: monospace;
+        }
+        .charCell{
+            text-align: center;
+            font-size: 50px;
+            display: table-cell;
+            background: black;
+            color: yellow;
+            width: 60px;
+            height: 60px;
+        }
+        .cellRow{
+            width: max-content;
+        }
+        .cellMatrix{
+            border: 1px solid black;
+            width: fit-content;
+        }
+        button{
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="cellContainer"></div>
+
+<button onclick="createAudioContext(); this.remove()">Enable clicks</button>
+<button onclick="setMatrixMessage('Next departure: Platform 10     To: Kings Cross', document.getElementsByClassName('cellMatrix')[0])">Test message</button>
+<button onclick="setMatrixMessage('', document.getElementsByClassName('cellMatrix')[0])">Clear</button>
+
+<br>
+
+<input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+
+</body>
+<script>
+'use strict'
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+var cellChars = [
+    "A", "B", "C", "D",
+    "E", "F", "G", "H",
+    "I", "J", "K", "L",
+    "M", "N", "O", "P",
+    "Q", "R", "S", "T",
+    "U", "V", "W", "X",
+    "Y", "Z", "0", "1",
+    "2", "3", "4", "5",
+    "6", "7", "8", "9",
+    "?", "!", "/", ".",
+    ":", "_", "*", "(",
+    ")", " "
+]
+
+function createCell(){
+    var cellHtml = "<div class='charCell'>A</div>"
+    document.getElementById("cellContainer").innerHTML += cellHtml
+}
+
+function createCellMatrix(width, height){
+    var cellHtml = "<div class='charCell'>A</div>"
+    var rowHtml = "<div class='cellRow'>" + cellHtml.repeat(width) + "</div>"
+    var matrixHtml = "<div class='cellMatrix'>" + rowHtml.repeat(height) + "</div>"
+    document.getElementById("cellContainer").innerHTML += matrixHtml
+}
+
+async function setCellText(inputChar, targetCell){
+    inputChar = inputChar[0].toUpperCase()
+    if (!cellChars.includes(inputChar)){
+        console.error("input char", inputChar, "not in charlist")
+    }
+    inputChar = inputChar ? inputChar : "*"
+
+    // quit if the current character is not in the charlist
+    var currentChar = targetCell.innerHTML
+    currentChar = currentChar ? currentChar : " " // spaces get stripped, so we force them back in
+    if (!cellChars.includes(currentChar)){
+        console.error("current char", currentChar, "not in charlist")
+        return
+    }
+
+    // quit if the input and current are the same
+    if (inputChar == currentChar){
+        return
+    }
+    
+    var idx_currentChar = cellChars.indexOf(currentChar)
+
+    // start at the index of the current character
+    // loop around the list to 1 minus the character
+    for (var i=idx_currentChar; i<(idx_currentChar + cellChars.length); i++){
+        var arrayPos = i % cellChars.length
+        targetCell.innerHTML = cellChars[arrayPos]
+        piezoClick()
+        if (cellChars[arrayPos] == inputChar){
+            return
+        }
+        else{
+            await sleep(60)
+        }
+    }
+}
+
+async function setMatrixMessage(inputMessage, targetMatrix){
+    for (var i=0; i<targetMatrix.getElementsByClassName("charCell").length; i++){
+        if (i<inputMessage.length){
+            setCellText(inputMessage[i], targetMatrix.getElementsByClassName("charCell")[i])
+        }
+        else{
+            setCellText(" ", targetMatrix.getElementsByClassName("charCell")[i])
+        }
+        await sleep(60)
+    }
+}
+
+function piezoClick(){
+    if (context){
+        var osc = context.createOscillator(); // instantiate an oscillator
+        osc.type = 'sawtooth';
+        osc.frequency.value = 3000; // Hz
+        osc.connect(context.destination); // connect it to the destination
+        osc.start(); // start the oscillator
+        osc.stop(context.currentTime + 0.001); // stop
+    }
+}
+
+function createAudioContext(){
+    if (!context){
+        context = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+// audio stuff
+var context
+
+function init(){
+    createCellMatrix(16, 3)
+}
+
+init();
+</script>
+</html>
