@@ -146,10 +146,12 @@ function toggleTimeInterval(){
 }
 
 function turnOffTimerInterval(){
-    while (timeInterval.length){
-        clearInterval(timeInterval.shift())
+    if (timeInterval.length){
+        while (timeInterval.length){
+            clearInterval(timeInterval.shift())
+        }
+        clearMessage(document.getElementsByClassName('cellMatrix')[0]);
     }
-    clearMessage(document.getElementsByClassName('cellMatrix')[0]);
 }
 
 function clearMessage(targetElement){
