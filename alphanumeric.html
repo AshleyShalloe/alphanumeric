@@ -1,8 +1,18 @@
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <title>Alphanumeric</title>
     <style>
         html{
             font-family: sans-serif;
+            background: lightgray;
+        }
+        body{
+            margin: 0 auto;
+            display: grid;
+            justify-items: center;
+            align-content: center;
         }
         .charCell{
             text-align: center;
@@ -21,6 +31,9 @@
         .cellMatrix{
             width: fit-content;
             background: black;
+            box-shadow: 0px 0px 10px black;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         button, input{
             margin-top: 5px;
@@ -45,20 +58,29 @@
         .skeuButton:hover{
             border: 1px solid rgb(217, 217, 217);
         }
+        .buttonContainer{
+            padding: 5px 10px;
+            background: white;
+            border-radius: 0.4em;
+            margin: 10px;
+            box-shadow: 2px 2px 4px #80808080, -2px -2px 4px #ffffff6b;
+        }
     </style>
 </head>
 <body>
 
 <div id="cellContainer"></div>
 
-<button class="skeuButton" onclick="createAudioContext(); this.remove()">Enable clicks</button>
-<button class="skeuButton" onclick="turnOffTimerInterval(); setMatrixMessage('Next departure: Platform 10     To: Kings Cross', document.getElementsByClassName('cellMatrix')[0])">Test message</button>
-<button class="skeuButton" onclick="turnOffTimerInterval(); clearMessage(document.getElementsByClassName('cellMatrix')[0])">Clear</button>
-<button class="skeuButton" onclick="toggleTimeInterval()">Time</button>
+<div class="buttonContainer">
+    <button class="skeuButton" onclick="createAudioContext(); this.remove()">Enable clicks</button>
+    <button class="skeuButton" onclick="turnOffTimerInterval(); setMatrixMessage('Next departure: Platform 10     To: Kings Cross', document.getElementsByClassName('cellMatrix')[0])">Test message</button>
+    <button class="skeuButton" onclick="turnOffTimerInterval(); clearMessage(document.getElementsByClassName('cellMatrix')[0])">Clear</button>
+    <button class="skeuButton" onclick="toggleTimeInterval()">Time</button>
+</div>
 
-<br>
-
-<input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+<div class="buttonContainer">
+    <input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+</div>
 
 </body>
 <script>
@@ -150,7 +172,7 @@ var cellChars = [
     "6", "7", "8", "9",
     "?", "!", "/", ".",
     ":", "_", "*", "(",
-    ")", " "
+    ")", "<", ">", " "
 ]
 
 function createCell(){
@@ -231,6 +253,23 @@ function createAudioContext(){
     }
 }
 
+function initialMessage(){
+    setMatrixMessage(
+        middlepad(
+            "", 
+            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            " "
+        ) + 
+        middlepad(
+            ">Alphanumeric<", 
+            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            " "
+        )
+    ,
+    document.getElementsByClassName('cellMatrix')[0]
+    )
+}
+
 // audio stuff
 var context
 
@@ -239,6 +278,7 @@ var timeInterval = []
 
 function init(){
     createCellMatrix(16, 3)
+    initialMessage();
 }
 
 init();
