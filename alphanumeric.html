@@ -2,7 +2,7 @@
 <head>
     <style>
         html{
-            font-family: monospace;
+            font-family: sans-serif;
         }
         .charCell{
             text-align: center;
@@ -12,17 +12,38 @@
             color: yellow;
             width: 60px;
             height: 60px;
+            border: 1px solid rgb(42, 42, 42);
+            border-radius: 3px;
         }
         .cellRow{
             width: max-content;
         }
         .cellMatrix{
-            border: 1px solid black;
             width: fit-content;
+            background: black;
         }
-        button{
+        button, input{
             margin-top: 5px;
             margin-bottom: 5px;
+            padding: 10px;
+            font-size: 20px;
+        }
+        .skeuButton{
+            background: white;
+            color: #2c213d;
+            box-shadow: 2px 2px 4px #80808080, -2px -2px 4px #ffffff6b;
+            border-radius: 0.4em;
+            border: 1px solid rgb(237, 237, 237);
+            transition: border 0.5s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .skeuButton:active{
+            color: darkblue;
+            box-shadow: inset 2px 2px 4px #80808080, inset -2px -2px 4px #ffffff6b;
+        }
+        .skeuButton:hover{
+            border: 1px solid rgb(217, 217, 217);
         }
     </style>
 </head>
@@ -30,17 +51,88 @@
 
 <div id="cellContainer"></div>
 
-<button onclick="createAudioContext(); this.remove()">Enable clicks</button>
-<button onclick="setMatrixMessage('Next departure: Platform 10     To: Kings Cross', document.getElementsByClassName('cellMatrix')[0])">Test message</button>
-<button onclick="setMatrixMessage('', document.getElementsByClassName('cellMatrix')[0])">Clear</button>
+<button class="skeuButton" onclick="createAudioContext(); this.remove()">Enable clicks</button>
+<button class="skeuButton" onclick="turnOffTimerInterval(); setMatrixMessage('Next departure: Platform 10     To: Kings Cross', document.getElementsByClassName('cellMatrix')[0])">Test message</button>
+<button class="skeuButton" onclick="turnOffTimerInterval(); clearMessage(document.getElementsByClassName('cellMatrix')[0])">Clear</button>
+<button class="skeuButton" onclick="toggleTimeInterval()">Time</button>
 
 <br>
 
-<input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+<input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 
 </body>
 <script>
 'use strict'
+
+function rightpad(inputString, targetLength, paddingChar){
+    var returnString = inputString;
+    if (!paddingChar.length){
+        return console.error("padding char must be at least 1 char long")
+    }
+    while (returnString.length < targetLength){
+        returnString = returnString + paddingChar
+    }
+    return returnString
+}
+
+function middlepad(inputString, targetLength, paddingChar){
+    var returnString = inputString;
+    if (!paddingChar.length){
+        return console.error("padding char must be at least 1 char long")
+    }
+    while (returnString.length < targetLength){
+        if (returnString.length % 2){
+            returnString = returnString + paddingChar
+        }
+        else{
+            returnString = paddingChar + returnString
+        }
+    }
+    return returnString
+}
+
+function dateytimey(){
+    var d = new Date()
+    return rightpad(
+            d.toLocaleDateString(), 
+            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            " "
+        ) + d.toLocaleTimeString()
+}
+
+function centredateytimey(){
+    var d = new Date()
+    return middlepad(
+            d.toLocaleDateString(), 
+            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            " "
+        ) + 
+        middlepad(
+            d.toLocaleTimeString(), 
+            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            " "
+        )
+}
+
+function toggleTimeInterval(){
+    if (timeInterval.length){
+        turnOffTimerInterval();
+    }
+    else{
+        timeInterval.push(setInterval(function (){setMatrixMessage(centredateytimey(), document.getElementsByClassName('cellMatrix')[0])}, 100))
+    }
+}
+
+function turnOffTimerInterval(){
+    while (timeInterval.length){
+        clearInterval(timeInterval.shift())
+    }
+    clearMessage(document.getElementsByClassName('cellMatrix')[0]);
+}
+
+function clearMessage(targetElement){
+    setMatrixMessage('', targetElement)
+}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -141,6 +233,9 @@ function createAudioContext(){
 
 // audio stuff
 var context
+
+// other globals
+var timeInterval = []
 
 function init(){
     createCellMatrix(16, 3)
