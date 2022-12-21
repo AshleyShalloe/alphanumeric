@@ -189,6 +189,7 @@ function createCellMatrix(width, height){
 
 async function setCellText(inputChar, targetCell){
     inputChar = inputChar[0].toUpperCase()
+
     if (!cellChars.includes(inputChar)){
         console.error("input char", inputChar, "not in charlist")
     }
@@ -197,6 +198,9 @@ async function setCellText(inputChar, targetCell){
     // quit if the current character is not in the charlist
     var currentChar = targetCell.innerHTML
     currentChar = currentChar ? currentChar : " " // spaces get stripped, so we force them back in
+    // fix greater than/less than
+    currentChar = currentChar == "&lt;" ? "<" : currentChar
+    currentChar = currentChar == "&gt;" ? ">" : currentChar
     if (!cellChars.includes(currentChar)){
         console.error("current char", currentChar, "not in charlist")
         return
