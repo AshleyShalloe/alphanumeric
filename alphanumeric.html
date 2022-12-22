@@ -214,7 +214,8 @@ var cellChars = [
     "6", "7", "8", "9",
     "?", "!", "/", ".",
     ":", "_", "*", "(",
-    ")", "<", ">", " "
+    ")", "<", ">", "&",
+    " "
 ]
 
 function createCell(){
@@ -319,6 +320,28 @@ function initialMessage(){
     ,
     document.getElementsByClassName('cellMatrix')[0]
     )
+}
+
+function getMaxWidthOfInputText(inputText){
+    var maxWidth = 0
+    var splitArray = inputText.split("\n")
+    for (var i=0; i<splitArray.length; i++){
+        maxWidth = splitArray[i].length > maxWidth ? splitArray[i].length : maxWidth
+    }
+    return maxWidth
+}
+
+function padLinesToTarget(inputText, targetWidth, padchar=" "){
+    // pads lines to target width
+    // lines longer than target width will be truncated
+    var returnString = ""
+    var splitArray = inputText.split("\n")
+    for (var i=0; i<splitArray.length; i++){
+        var tempString = splitArray[i].slice(0,targetWidth)
+        tempString = tempString + padchar.repeat(targetWidth - tempString.length)
+        returnString += tempString
+    }
+    return returnString
 }
 
 // audio stuff
