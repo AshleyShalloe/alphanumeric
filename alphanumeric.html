@@ -14,6 +14,9 @@
             justify-items: center;
             align-content: center;
         }
+        .cellContainer{
+            overflow: auto;
+        }
         .charCell{
             text-align: center;
             font-size: 50px;
@@ -65,10 +68,21 @@
             margin: 10px;
             box-shadow: 2px 2px 4px #80808080, -2px -2px 4px #ffffff6b;
         }
+        .onelinelink{
+            margin-bottom: 10px;
+            margin-top: 10px;
+            color: black !important;
+            text-decoration: none;
+        }
+        .onelinelink:hover{
+            text-decoration: underline;
+        }
+        label{
+            user-select: none;
+        }
     </style>
 </head>
 <body>
-
 <div id="cellContainer"></div>
 
 <div class="buttonContainer">
@@ -81,6 +95,32 @@
 <div class="buttonContainer">
     <input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
+
+<div class="buttonContainer">
+    <input type="text" id="matrixSetWidth" value="16" style="width: 3em; text-align: center""></input>
+    ×
+    <input type="text" id="matrixSetHeight" value="3" style="width: 3em; text-align: center"></input>
+    <button onclick="turnOffTimerInterval(); clearAllCellMatrix(); createCellMatrix(document.getElementById('matrixSetWidth').value, document.getElementById('matrixSetHeight').value)">Set</button>
+</div>
+
+<div class="buttonContainer">
+    <table>
+        <tr>
+            <td>Flip speed</td>
+            <td><input type="radio" name="cellTick" value=120 onclick="cellTickMs = 120"><label for="120" onclick="this.previousElementSibling.click()"">Slow</label></td>
+            <td><input type="radio" name="cellTick" value=60  onclick="cellTickMs = 60" checked><label for="60" onclick="this.previousElementSibling.click()"">Normal</label></td>
+            <td><input type="radio" name="cellTick" value=1   onclick="cellTickMs = 1"><label for="1" onclick="this.previousElementSibling.click()">Fast</label></td>
+        </tr>
+        <tr>
+            <td>Multiplexing</td>
+            <td><input type="radio" name="mutiplexing" value=300 onclick="multiplexSpeedMs = 300"><label for="300" onclick="this.previousElementSibling.click()">Slow</label></td>
+            <td><input type="radio" name="mutiplexing" value=60  onclick="multiplexSpeedMs = 60" checked><label for="60" onclick="this.previousElementSibling.click()">Normal</label></td>
+            <td><input type="radio" name="mutiplexing" value=1   onclick="multiplexSpeedMs = 1"><label for="1" onclick="this.previousElementSibling.click()">Fast</label></td>
+        </tr>
+    </table>
+</div>
+
+<a class="onelinelink" target="_blank" href="https://github.com/AshleyShalloe/alphanumeric">GitHub</a>
 
 </body>
 <script>
@@ -189,6 +229,10 @@ function createCellMatrix(width, height){
     document.getElementById("cellContainer").innerHTML += matrixHtml
 }
 
+function clearAllCellMatrix(){
+    document.getElementById("cellContainer").innerHTML = ""
+}
+
 async function setCellText(inputChar, targetCell){
     inputChar = inputChar[0].toUpperCase()
 
@@ -225,7 +269,7 @@ async function setCellText(inputChar, targetCell){
             return
         }
         else{
-            await sleep(60)
+            await sleep(cellTickMs)
         }
     }
     targetCell.innerHTML = " "
@@ -239,7 +283,7 @@ async function setMatrixMessage(inputMessage, targetMatrix){
         else{
             setCellText(" ", targetMatrix.getElementsByClassName("charCell")[i])
         }
-        await sleep(60)
+        await sleep(multiplexSpeedMs)
     }
 }
 
@@ -282,6 +326,8 @@ var context
 
 // other globals
 var timeInterval = []
+var cellTickMs = 60 // how long each character takes to flip
+var multiplexSpeedMs = 60 // staggered delay before processing the next cell
 
 function init(){
     createCellMatrix(16, 3)
