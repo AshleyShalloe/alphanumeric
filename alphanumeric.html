@@ -69,6 +69,10 @@
             margin: 10px;
             box-shadow: 2px 2px 4px #80808080, -2px -2px 4px #ffffff6b;
         }
+        .matrixTextArea{
+            resize: none;
+            word-wrap: break-all;
+        }
         .onelinelink{
             margin-bottom: 10px;
             margin-top: 10px;
@@ -94,22 +98,22 @@
 </div>
 
 <div class="buttonContainer">
-    <input type="text" id="userMessageInput" value="Message goes here"></input> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+    <textarea class="matrixTextArea" width="16" rows="3" id="userMessageInput" placeholder="Message goes here"></textarea> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
 
 <div class="buttonContainer">
-    <input type="text" id="matrixSetWidth" value="16" style="width: 3em; text-align: center""></input>
+    <input type="text" id="matrixSetWidth" value="16" style="width: 3em; text-align: center"></input>
     ×
     <input type="text" id="matrixSetHeight" value="3" style="width: 3em; text-align: center"></input>
-    <button onclick="turnOffTimerInterval(); clearAllCellMatrix(); createCellMatrix(document.getElementById('matrixSetWidth').value, document.getElementById('matrixSetHeight').value)">Set</button>
+    <button onclick="updateMatrixSize(document.getElementById('matrixSetWidth').value, document.getElementById('matrixSetHeight').value)">Set</button>
 </div>
 
 <div class="buttonContainer">
     <table>
         <tr>
             <td>Flip speed</td>
-            <td><input type="radio" name="cellTick" value=120 onclick="cellTickMs = 120"><label for="120" onclick="this.previousElementSibling.click()"">Slow</label></td>
-            <td><input type="radio" name="cellTick" value=60  onclick="cellTickMs = 60" checked><label for="60" onclick="this.previousElementSibling.click()"">Normal</label></td>
+            <td><input type="radio" name="cellTick" value=120 onclick="cellTickMs = 120"><label for="120" onclick="this.previousElementSibling.click()">Slow</label></td>
+            <td><input type="radio" name="cellTick" value=60  onclick="cellTickMs = 60" checked><label for="60" onclick="this.previousElementSibling.click()">Normal</label></td>
             <td><input type="radio" name="cellTick" value=1   onclick="cellTickMs = 1"><label for="1" onclick="this.previousElementSibling.click()">Fast</label></td>
         </tr>
         <tr>
@@ -235,6 +239,23 @@ function clearAllCellMatrix(){
     document.getElementById("cellContainer").innerHTML = ""
 }
 
+function getCellMatrixWidth(){
+    return document.getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length
+}
+
+function updateInputSize(width, height){
+    var inputTextArea = document.getElementById("userMessageInput");
+    inputTextArea.cols = width;
+    inputTextArea.rows = height;
+}
+
+function updateMatrixSize(width, height){
+    turnOffTimerInterval();
+    clearAllCellMatrix(); 
+    createCellMatrix(width, height);
+    updateInputSize(width, height);
+}
+
 async function setCellText(inputChar, targetCell){
     inputChar = inputChar[0].toUpperCase()
 
@@ -278,9 +299,10 @@ async function setCellText(inputChar, targetCell){
 }
 
 async function setMatrixMessage(inputMessage, targetMatrix){
+    var paddedMessage = padLinesToTarget(inputMessage, getCellMatrixWidth());
     for (var i=0; i<targetMatrix.getElementsByClassName("charCell").length; i++){
-        if (i<inputMessage.length){
-            setCellText(inputMessage[i], targetMatrix.getElementsByClassName("charCell")[i])
+        if (i<paddedMessage.length){
+            setCellText(paddedMessage[i], targetMatrix.getElementsByClassName("charCell")[i])
         }
         else{
             setCellText(" ", targetMatrix.getElementsByClassName("charCell")[i])
