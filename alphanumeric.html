@@ -290,13 +290,17 @@ async function setMatrixMessage(inputMessage, targetMatrix){
 }
 
 function piezoClick(){
+    // use a different duration for firefox
+    // consider detecting Gecko vs Webkit/Blink instead
+    var duration = navigator.userAgent.match(/firefox/i) ? 0.012 : 0.001
+    
     if (context){
         var osc = context.createOscillator(); // instantiate an oscillator
         osc.type = 'sawtooth';
         osc.frequency.value = 3000; // Hz
         osc.connect(context.destination); // connect it to the destination
         osc.start(); // start the oscillator
-        osc.stop(context.currentTime + 0.001); // stop
+        osc.stop(context.currentTime + duration); // stop
     }
 }
 
