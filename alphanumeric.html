@@ -71,7 +71,7 @@
         }
         .matrixTextArea{
             resize: none;
-            word-wrap: break-all;
+            overflow-x: hidden;
         }
         .onelinelink{
             margin-bottom: 10px;
@@ -98,13 +98,14 @@
 </div>
 
 <div class="buttonContainer">
-    <textarea class="matrixTextArea" width="16" rows="3" id="userMessageInput" placeholder="Message goes here"></textarea> <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
+    <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message goes here" oninput="this.value = wrapLinesToTarget(this.value)"></textarea>
+    <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
 
 <div class="buttonContainer">
-    <input type="text" id="matrixSetWidth" value="16" style="width: 3em; text-align: center"></input>
+    <input type="text" id="matrixSetWidth" style="width: 3em; text-align: center"></input>
     ×
-    <input type="text" id="matrixSetHeight" value="3" style="width: 3em; text-align: center"></input>
+    <input type="text" id="matrixSetHeight" style="width: 3em; text-align: center"></input>
     <button onclick="updateMatrixSize(document.getElementById('matrixSetWidth').value, document.getElementById('matrixSetHeight').value)">Set</button>
 </div>
 
@@ -239,10 +240,6 @@ function clearAllCellMatrix(){
     document.getElementById("cellContainer").innerHTML = ""
 }
 
-function getCellMatrixWidth(){
-    return document.getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length
-}
-
 function updateInputSize(width, height){
     var inputTextArea = document.getElementById("userMessageInput");
     inputTextArea.cols = width;
@@ -251,9 +248,14 @@ function updateInputSize(width, height){
 
 function updateMatrixSize(width, height){
     turnOffTimerInterval();
-    clearAllCellMatrix(); 
+    clearAllCellMatrix();
+    setMatrixSize(width, height);
+}
+
+function setMatrixSize(width, height){
     createCellMatrix(width, height);
     updateInputSize(width, height);
+    matrixWidth = width;
 }
 
 async function setCellText(inputChar, targetCell){
@@ -299,7 +301,7 @@ async function setCellText(inputChar, targetCell){
 }
 
 async function setMatrixMessage(inputMessage, targetMatrix){
-    var paddedMessage = padLinesToTarget(inputMessage, getCellMatrixWidth());
+    var paddedMessage = padLinesToTarget(inputMessage, matrixWidth);
     for (var i=0; i<targetMatrix.getElementsByClassName("charCell").length; i++){
         if (i<paddedMessage.length){
             setCellText(paddedMessage[i], targetMatrix.getElementsByClassName("charCell")[i])
@@ -368,6 +370,26 @@ function padLinesToTarget(inputText, targetWidth, padchar=" "){
     return returnString
 }
 
+function ceilDiv(a, b){ // divide and round up, without any floats, for a>=0 and b>0
+    return (a + (((-a)%b) + b)%b) / b
+}
+
+function wrapLinesToTarget(inputText, targetWidth = matrixWidth){
+    // wraps lines to target width
+    // lines longer than target width will be wrapped
+    var returnLines = new Array()
+    var splitArray = inputText.split("\n")
+    for (var i=0; i<splitArray.length; i++){
+        var currentLine = splitArray[i]
+        var numFullLines = Math.max(ceilDiv(currentLine.length, targetWidth), 1)
+        for (var subLine=0; subLine<numFullLines; subLine++){
+            returnLines.push(currentLine.slice(targetWidth * subLine, targetWidth * (subLine + 1)))
+        }
+    }
+    return returnLines.join("\n")
+}
+
+
 function isFirefox(){
     return navigator.userAgent.match(/firefox/i)
 }
@@ -393,10 +415,15 @@ var base64click = "data:video/ogg;base64,T2dnUwACAAAAAAAAAADBIV8TAAAAAIeuPdUBHgF
 var timeInterval = []
 var cellTickMs = 60 // how long each character takes to flip
 var multiplexSpeedMs = 60 // staggered delay before processing the next cell
+var matrixWidth = NaN
 
 function init(){
+    const initialWidth = 16
+    const initialHeight = 3
     firefoxQuirks();
-    createCellMatrix(16, 3)
+    setMatrixSize(initialWidth, initialHeight)
+    document.getElementById("matrixSetWidth").value = initialWidth.toString()
+    document.getElementById("matrixSetHeight").value = initialHeight.toString()
     initialMessage();
 }
 
