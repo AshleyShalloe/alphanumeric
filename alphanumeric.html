@@ -349,6 +349,20 @@ function padLinesToTarget(inputText, targetWidth, padchar=" "){
     return returnString
 }
 
+function isFirefox(){
+    return navigator.userAgent.match(/firefox/i)
+}
+
+function firefoxQuirks(){
+    if (isFirefox()){
+        // set viewport height to 100vh
+        var element = document.createElement('style');
+        element.innerHTML = "body{height: 100vh}";
+        document.head.appendChild(element);
+        
+    }
+}
+
 // audio stuff
 var context
 
@@ -358,6 +372,7 @@ var cellTickMs = 60 // how long each character takes to flip
 var multiplexSpeedMs = 60 // staggered delay before processing the next cell
 
 function init(){
+    firefoxQuirks();
     createCellMatrix(16, 3)
     initialMessage();
 }
