@@ -72,6 +72,7 @@
         .matrixTextArea{
             resize: none;
             overflow-x: hidden;
+            word-break: break-all;
         }
         .onelinelink{
             margin-bottom: 10px;
@@ -98,7 +99,7 @@
 </div>
 
 <div class="buttonContainer">
-    <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message goes here" oninput="this.value = wrapLinesToTarget(this.value)"></textarea>
+    <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message goes here"></textarea>
     <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
 
@@ -255,7 +256,7 @@ function updateMatrixSize(width, height){
 function setMatrixSize(width, height){
     createCellMatrix(width, height);
     updateInputSize(width, height);
-    matrixWidth = width;
+    matrixWidth = width
 }
 
 async function setCellText(inputChar, targetCell){
@@ -301,7 +302,7 @@ async function setCellText(inputChar, targetCell){
 }
 
 async function setMatrixMessage(inputMessage, targetMatrix){
-    var paddedMessage = padLinesToTarget(inputMessage, matrixWidth);
+    var paddedMessage = padWrapLinesToTarget(inputMessage, matrixWidth);
     for (var i=0; i<targetMatrix.getElementsByClassName("charCell").length; i++){
         if (i<paddedMessage.length){
             setCellText(paddedMessage[i], targetMatrix.getElementsByClassName("charCell")[i])
@@ -357,36 +358,24 @@ function getMaxWidthOfInputText(inputText){
     return maxWidth
 }
 
-function padLinesToTarget(inputText, targetWidth, padchar=" "){
-    // pads lines to target width
-    // lines longer than target width will be truncated
-    var returnString = ""
-    var splitArray = inputText.split("\n")
-    for (var i=0; i<splitArray.length; i++){
-        var tempString = splitArray[i].slice(0,targetWidth)
-        tempString = tempString + padchar.repeat(targetWidth - tempString.length)
-        returnString += tempString
-    }
-    return returnString
-}
-
 function ceilDiv(a, b){ // divide and round up, without any floats, for a>=0 and b>0
     return (a + (((-a)%b) + b)%b) / b
 }
 
-function wrapLinesToTarget(inputText, targetWidth = matrixWidth){
-    // wraps lines to target width
+function padWrapLinesToTarget(inputText, targetWidth = matrixWidth, padchar = " "){
+    // pads and wraps lines to target width
     // lines longer than target width will be wrapped
     var returnLines = new Array()
     var splitArray = inputText.split("\n")
     for (var i=0; i<splitArray.length; i++){
         var currentLine = splitArray[i]
         var numFullLines = Math.max(ceilDiv(currentLine.length, targetWidth), 1)
-        for (var subLine=0; subLine<numFullLines; subLine++){
+        for (var subLine=0; subLine<numFullLines-1; subLine++){ // push all full lines to output
             returnLines.push(currentLine.slice(targetWidth * subLine, targetWidth * (subLine + 1)))
         }
+        returnLines.push(currentLine.slice(targetWidth * (numFullLines - 1)) + padchar.repeat(targetWidth - (currentLine.length - 1) % targetWidth - 1))
     }
-    return returnLines.join("\n")
+    return returnLines.join("")
 }
 
 
@@ -416,15 +405,18 @@ var timeInterval = []
 var cellTickMs = 60 // how long each character takes to flip
 var multiplexSpeedMs = 60 // staggered delay before processing the next cell
 var matrixWidth = NaN
+var inputTextLength = NaN;
 
 function init(){
     const initialWidth = 16
     const initialHeight = 3
+    const initialInputMessage = ""
     firefoxQuirks();
     setMatrixSize(initialWidth, initialHeight)
     document.getElementById("matrixSetWidth").value = initialWidth.toString()
     document.getElementById("matrixSetHeight").value = initialHeight.toString()
     initialMessage();
+    inputTextLength = initialInputMessage.length
 }
 
 init();
