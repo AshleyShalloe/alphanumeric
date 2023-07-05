@@ -99,7 +99,7 @@
 </div>
 
 <div class="buttonContainer">
-    <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message goes here"></textarea>
+    <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message&#10;goes here"></textarea>
     <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
 
@@ -336,12 +336,12 @@ function initialMessage(){
     setMatrixMessage(
         middlepad(
             "", 
-            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            matrixWidth, 
             " "
         ) + 
         middlepad(
             ">Alphanumeric<", 
-            document.getElementsByClassName('cellMatrix')[0].getElementsByClassName("cellRow")[0].getElementsByClassName("charCell").length, 
+            matrixWidth, 
             " "
         )
     ,
@@ -405,18 +405,15 @@ var timeInterval = []
 var cellTickMs = 60 // how long each character takes to flip
 var multiplexSpeedMs = 60 // staggered delay before processing the next cell
 var matrixWidth = NaN
-var inputTextLength = NaN;
 
 function init(){
     const initialWidth = 16
     const initialHeight = 3
-    const initialInputMessage = ""
     firefoxQuirks();
     setMatrixSize(initialWidth, initialHeight)
     document.getElementById("matrixSetWidth").value = initialWidth.toString()
     document.getElementById("matrixSetHeight").value = initialHeight.toString()
     initialMessage();
-    inputTextLength = initialInputMessage.length
 }
 
 init();
