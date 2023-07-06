@@ -87,6 +87,16 @@
         label{
             user-select: none;
         }
+        #messageInputContainer{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #userMessageInput{
+            margin: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -99,7 +109,7 @@
     <button class="skeuButton" onclick="toggleTimeInterval()">Time</button>
 </div>
 
-<div class="buttonContainer">
+<div class="buttonContainer" id="messageInputContainer">
     <textarea class="matrixTextArea" id="userMessageInput" placeholder="Message&#10;goes here"></textarea>
     <button onclick="turnOffTimerInterval(); setMatrixMessage(userMessageInput.value, document.getElementsByClassName('cellMatrix')[0])">Go</button>
 </div>
